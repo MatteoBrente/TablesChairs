@@ -49,7 +49,7 @@ public:
 		float ChairSize = 40.f;
 
 	UPROPERTY(EditAnywhere)
-		float ChairMinDistance = 10.f;
+		float ChairMinDistance = 15.f;
 
 protected:
 	// Called when the game starts or when spawned

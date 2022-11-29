@@ -166,7 +166,10 @@ FVector ATable::SetChairPositionOnY(int CurrentChairNumber, bool IsOpposite)
 	
 	// Calculates the position for the ones at the top of the table
 	if (IsOpposite)
+	{
 		CurrentChairPosition.X += TableX + 2 * ChairMinDistance;
+		CurrentChairPosition.Y += 40;
+	}
 
 	return CurrentChairPosition;
 }
@@ -182,7 +185,13 @@ FVector ATable::SetChairPositionOnX(int CurrentChairNumber, bool IsOpposite)
 	
 	// Calculates the position for the ones at the left of the table
 	if (IsOpposite)
+	{
 		CurrentChairPosition.Y += TableY + 2 * ChairMinDistance;
+	}
+	else
+	{
+		CurrentChairPosition.X += 40;
+	}
 
 	return CurrentChairPosition;
 }
