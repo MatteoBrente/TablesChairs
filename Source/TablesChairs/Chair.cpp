@@ -8,7 +8,7 @@ AChair::AChair()
 
 }
 
-void AChair::Init(FVector Point, FVector Rotation)
+void AChair::Init(FVector Point)
 {
 	this->ChairSpawningPoint = Point;
 }
@@ -68,7 +68,7 @@ void AChair::BeginPlay()
 	DrawCube(ChairSeatVertices);
 	DrawCube(BackrestVertices);
 
-	float HalfLength = 0; // ChairWidth / 2;
+	float HalfLength = ChairWidth / 2;
 
 	DrawLeg(SeatBottomBL, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, HalfLength);
 	DrawLeg(SeatBottomBR, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, HalfLength);
@@ -76,6 +76,10 @@ void AChair::BeginPlay()
 	DrawLeg(SeatBottomTL, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, HalfLength);
 
 	StopDrawing();
+
+
+	this->SetPivotOffset(ChairSpawningPoint);
+	//this->SetActorRelativeRotation(FQuat{ 0.f, 0.f, 180.f, 0.f });
 
 	//ThisMesh->AddLocalRotation(this->GetActorRotation();
 }

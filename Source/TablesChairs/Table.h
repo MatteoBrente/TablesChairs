@@ -65,35 +65,37 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	// Main tabletop vertices
 	FVector BottomLeft = FVector(-TableX, -TableY, TableZ);
 	FVector BottomRight = FVector(-TableX, TableY, TableZ);
 	FVector TopRight = FVector(TableX, TableY, TableZ);
 	FVector TopLeft = FVector(TableX, -TableY, TableZ);
 
-	float LegHeight = TableZ - TableTopHeight;
-
-	std::vector<AChair*> MyChairs = {};
-
+	// Table variables
 	float UsableTableX = TableX - LegThickness * 2;
 	float UsableTableY = TableY - LegThickness * 2;
 
+	float LegHeight = TableZ - TableTopHeight;
+
+	// Table functions
+	void UpdateTableSize();
+
+	// Chair variables
+	std::vector<AChair*> MyChairs = {};
+
 	int NumberOfChairsOnX = 0;
 	int NumberOfChairsOnY = 0;
+
 	float CurrentChairDistanceOnY = 0;
 	float CurrentChairDistanceOnX = 0;
 
+	// Chair position vectors
+	FVector SetChairPositionOnY(int CurrentChairNumber, bool IsOpposite = false);
+	FVector SetChairPositionOnX(int CurrentChairNumber, bool IsOpposite = false);
 
-	void UpdateTableSize();
-
+	// Chair functions
 	void SpawnChairs();
 	void DeleteAllChairs();
-
 	void UpdateNumberOfChairsOnY();
 	void UpdateNumberOfChairsOnX();
-
-	void UpdateCurrentChairDistanceOnY();
-	void UpdateCurrentChairDistanceOnX();
-
-	FVector SetChairPositionOnY(int CurrentChairNumber);
-	FVector SetChairPositionOnX(int CurrentChairNumber);
 };

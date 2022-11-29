@@ -29,7 +29,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		float ChairElementsThickness = 5.f;
 
-	void Init(FVector Point, FVector Rotation = FVector::ForwardVector);
+	void Init(FVector Point);
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,5 +37,5 @@ protected:
 
 private:
 	FVector ChairSpawningPoint = { 0.f, 0.f, 0.f };
-	FVector ChairRotation = { 0.f, 0.f, 0.f };
+	bool IsOpposite = false;
 };

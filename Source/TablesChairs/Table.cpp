@@ -24,6 +24,7 @@ void ATable::GenerateTable()
 {
 	StartDrawing();
 
+	// Vectors under the main ones (bottom of the tabletop)
 	FVector BelowBL = CalculatePointBelow(BottomLeft, TableTopHeight);
 	FVector BelowBR = CalculatePointBelow(BottomRight, TableTopHeight);
 	FVector BelowTR = CalculatePointBelow(TopRight, TableTopHeight);
@@ -41,6 +42,7 @@ void ATable::GenerateTable()
 		BelowTL		  // Bottom Back  Left
 	};
 
+	// Section where I draw each piece of the table
 	DrawCube(TableVertices);
 	DrawLeg(BelowBL, LegHeight, LegThickness);
 	DrawLeg(BelowBR, LegHeight, LegThickness);
@@ -51,6 +53,7 @@ void ATable::GenerateTable()
 
 	UpdateTableSize();
 
+	// Drawing chairs begins here
 	DeleteAllChairs();
 	SpawnChairs();
 
@@ -90,20 +93,32 @@ void ATable::SpawnChairs()
 
 	const FTransform TableTransform = this->GetTransform();
 
+	//Spawn Chairs on Y Axis
 	for (int i = 0; i < NumberOfChairsOnY; i++)
 	{
 		AChair* NewChair = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
 		NewChair->Init(SetChairPositionOnY(i));
 		NewChair->FinishSpawning(TableTransform);
 		MyChairs.push_back(NewChair);
+
+		AChair* NewChairOpposite = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
+		NewChairOpposite->Init(SetChairPositionOnY(i, true));
+		NewChairOpposite->FinishSpawning(TableTransform);
+		MyChairs.push_back(NewChairOpposite);
 	}
 
+	//Spawn Chairs on X Axis
 	for (int i = 0; i < NumberOfChairsOnX; i++)
 	{
 		AChair* NewChair = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
 		NewChair->Init(SetChairPositionOnX(i));
 		NewChair->FinishSpawning(TableTransform);
 		MyChairs.push_back(NewChair);
+
+		AChair* NewChairOpposite = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
+		NewChairOpposite->Init(SetChairPositionOnX(i, true));
+		NewChairOpposite->FinishSpawning(TableTransform);
+		MyChairs.push_back(NewChairOpposite);
 	}
 }
 
@@ -114,12 +129,12 @@ void ATable::DeleteAllChairs()
 		//UE_LOG(LogTemp, Warning, TEXT("%i"), MyChairs.size());
 		Chair->Destroy();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%i"), MyChairs.size());
 	MyChairs.clear();
 }
 
 void ATable::UpdateNumberOfChairsOnY()
 {
+	// Variable I need just for this calculation
 	float ChairDistanceSum = ChairSize + ChairMinDistance;
 
 	NumberOfChairsOnY = (int)(UsableTableY / (ChairDistanceSum - (ChairMinDistance / ChairDistanceSum)));
@@ -127,39 +142,40 @@ void ATable::UpdateNumberOfChairsOnY()
 
 void ATable::UpdateNumberOfChairsOnX()
 {
+	// Variable I need just for this calculation
 	float ChairDistanceSum = ChairSize + ChairMinDistance;
 
 	NumberOfChairsOnX = (int)(UsableTableX / (ChairDistanceSum - (ChairMinDistance / ChairDistanceSum)));
 }
 
-void ATable::UpdateCurrentChairDistanceOnY()
+FVector ATable::SetChairPositionOnY(int CurrentChairNumber, bool IsOpposite)
 {
+	// Change the chair distance on the Y axis
 	CurrentChairDistanceOnY = (UsableTableY - NumberOfChairsOnY * 40) / (NumberOfChairsOnY + 1);
-}
 
-void ATable::UpdateCurrentChairDistanceOnX()
-{
-	CurrentChairDistanceOnX = (UsableTableX - NumberOfChairsOnX * 40) / (NumberOfChairsOnX + 1);
-}
-
-FVector ATable::SetChairPositionOnY(int CurrentChairNumber)
-{
-
-	UpdateCurrentChairDistanceOnY();
+	// Calculates the position for chairs at the bottom of the table
 	float ChairDistanceSum = ChairSize + CurrentChairDistanceOnY;
-
-	FVector CurrentChairPosition = { BottomLeft.X, BottomLeft.Y + (LegThickness + ChairDistanceSum * CurrentChairNumber + CurrentChairDistanceOnY), 0 };
+	FVector CurrentChairPosition = { BottomLeft.X - ChairMinDistance, BottomLeft.Y + (LegThickness + ChairDistanceSum * CurrentChairNumber + CurrentChairDistanceOnY), 0 };
+	
+	// Calculates the position for the ones at the top of the table
+	if (IsOpposite)
+		CurrentChairPosition.X += TableX + 2 * ChairMinDistance;
 
 	return CurrentChairPosition;
 }
 
-FVector ATable::SetChairPositionOnX(int CurrentChairNumber)
+FVector ATable::SetChairPositionOnX(int CurrentChairNumber, bool IsOpposite)
 {
+	// Change the chair distance on the X axis
+	CurrentChairDistanceOnX = (UsableTableX - NumberOfChairsOnX * 40) / (NumberOfChairsOnX + 1);
 
-	UpdateCurrentChairDistanceOnX();
+	// Calculates the position for chairs at the right of the table
 	float ChairDistanceSum = ChairSize + CurrentChairDistanceOnX;
-
-	FVector CurrentChairPosition = { BottomLeft.X + (LegThickness + ChairDistanceSum * CurrentChairNumber + CurrentChairDistanceOnX), BottomLeft.Y, 0 };
+	FVector CurrentChairPosition = { BottomLeft.X + (LegThickness + ChairDistanceSum * CurrentChairNumber + CurrentChairDistanceOnX), BottomLeft.Y - ChairMinDistance, 0 };
+	
+	// Calculates the position for the ones at the left of the table
+	if (IsOpposite)
+		CurrentChairPosition.Y += TableY + 2 * ChairMinDistance;
 
 	return CurrentChairPosition;
 }
