@@ -24,18 +24,15 @@ public:
 		float ChairWidth = 40.f;
 
 	UPROPERTY(EditAnywhere)
-		float ChairDepth = 40.f;
-
-	UPROPERTY(EditAnywhere)
 		float ChairElementsThickness = 5.f;
 
-	void Init(FVector Point);
+	void Init(FVector Point, FQuat Quaternion);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
-	FVector ChairSpawningPoint = { 0.f, 0.f, 0.f };
-	bool IsOpposite = false;
+	FVector ChairSpawningPoint = {};
+	FQuat ChairRotation = FQuat{};
 };

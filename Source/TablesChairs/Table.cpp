@@ -88,8 +88,15 @@ void ATable::UpdateTableSize()
 
 void ATable::SpawnChairs()
 {
+	// Update chair numbers on all axis
 	UpdateNumberOfChairsOnY();
 	UpdateNumberOfChairsOnX();
+
+	// Set quaternions for later chair creation calls
+	FQuat Forward  = FQuat{ 0.f, 0.f, 0.f, 0.f };
+	FQuat Backward = FQuat{ 0.f, 0.f, 180.f, 0.f };
+	FQuat Right = FQuat{ FRotator{0.f, 90.f, 0.f} };
+	FQuat Left	   = FQuat{ FRotator{0.f, -90.f, 0.f} };
 
 	const FTransform TableTransform = this->GetTransform();
 
@@ -97,12 +104,12 @@ void ATable::SpawnChairs()
 	for (int i = 0; i < NumberOfChairsOnY; i++)
 	{
 		AChair* NewChair = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
-		NewChair->Init(SetChairPositionOnY(i));
+		NewChair->Init(SetChairPositionOnY(i), Forward);
 		NewChair->FinishSpawning(TableTransform);
 		MyChairs.push_back(NewChair);
 
 		AChair* NewChairOpposite = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
-		NewChairOpposite->Init(SetChairPositionOnY(i, true));
+		NewChairOpposite->Init(SetChairPositionOnY(i, true), Backward);
 		NewChairOpposite->FinishSpawning(TableTransform);
 		MyChairs.push_back(NewChairOpposite);
 	}
@@ -111,12 +118,12 @@ void ATable::SpawnChairs()
 	for (int i = 0; i < NumberOfChairsOnX; i++)
 	{
 		AChair* NewChair = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
-		NewChair->Init(SetChairPositionOnX(i));
+		NewChair->Init(SetChairPositionOnX(i), Right);
 		NewChair->FinishSpawning(TableTransform);
 		MyChairs.push_back(NewChair);
 
 		AChair* NewChairOpposite = World->SpawnActorDeferred<AChair>(AChair::StaticClass(), TableTransform);
-		NewChairOpposite->Init(SetChairPositionOnX(i, true));
+		NewChairOpposite->Init(SetChairPositionOnX(i, true), Left);
 		NewChairOpposite->FinishSpawning(TableTransform);
 		MyChairs.push_back(NewChairOpposite);
 	}

@@ -8,9 +8,19 @@ AChair::AChair()
 
 }
 
-void AChair::Init(FVector Point)
+void AChair::Init(FVector Point, FQuat Quaternion)
 {
+	// Set Chair pivot position
 	this->ChairSpawningPoint = Point;
+
+	this->SetPivotOffset(ChairSpawningPoint);
+	ChairSpawningPoint.Z += 20;
+	
+	ThisMesh->SetWorldLocation(ChairSpawningPoint);
+
+
+	// Set Chair rotation quaternion
+	ChairRotation = Quaternion;
 }
 
 void AChair::BeginPlay()
@@ -18,10 +28,12 @@ void AChair::BeginPlay()
 	Super::BeginPlay();
 	
 	//Chair seat vertices
-	FVector ChairSeatBL = { ChairSpawningPoint.X,		ChairSpawningPoint.Y,		 ChairSpawningPoint.Z + ChairSeatHeight };
-	FVector ChairSeatBR = { ChairSeatBL.X,				ChairSeatBL.Y + ChairWidth,  ChairSeatBL.Z };
-	FVector ChairSeatTR = { ChairSeatBL.X + ChairWidth, ChairSeatBL.Y + ChairWidth,  ChairSeatBL.Z };
-	FVector ChairSeatTL = { ChairSeatBL.X + ChairWidth, ChairSeatBL.Y,				 ChairSeatBL.Z };
+	FVector ChairSeatBL = { 0, 0, ChairSeatHeight};
+
+	FVector ChairSeatBR = { 0,			ChairWidth,  ChairSeatBL.Z };
+	FVector ChairSeatTR = { ChairWidth, ChairWidth,  ChairSeatBL.Z };
+	FVector ChairSeatTL = { ChairWidth, 0,			 ChairSeatBL.Z };
+
 	FVector SeatBottomBL = { CalculatePointBelow(ChairSeatBL, ChairElementsThickness) };
 	FVector SeatBottomBR = { CalculatePointBelow(ChairSeatBR, ChairElementsThickness) };
 	FVector SeatBottomTR = { CalculatePointBelow(ChairSeatTR, ChairElementsThickness) };
@@ -68,8 +80,6 @@ void AChair::BeginPlay()
 	DrawCube(ChairSeatVertices);
 	DrawCube(BackrestVertices);
 
-	float HalfLength = ChairWidth / 2;
-
 	DrawLeg(SeatBottomBL, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, ChairSeatBL, ChairSeatTR);
 	DrawLeg(SeatBottomBR, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, ChairSeatBL, ChairSeatTR);
 	DrawLeg(SeatBottomTR, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, ChairSeatBL, ChairSeatTR);
@@ -77,9 +87,6 @@ void AChair::BeginPlay()
 
 	StopDrawing();
 
-
-	//this->SetPivotOffset(ChairSpawningPoint);
-	//this->SetActorRelativeRotation(FQuat{ 0.f, 0.f, 180.f, 0.f });
-
-	//ThisMesh->AddLocalRotation(this->GetActorRotation();
+	// Rotate chair after it's created
+	ThisMesh->AddLocalRotation(ChairRotation);
 }
