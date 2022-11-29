@@ -36,7 +36,7 @@ public:
 
 	void DrawQuad(FVector A, FVector B, FVector C, FVector D, int32& Trindex, FProcMeshTangent Tangent);
 	void DrawCube(FVector CubeVertices[8]);
-	void DrawLeg(FVector StartingPoint, float LegHeight, float LegThickness, float HalfLength = 0);
+	void DrawLeg(FVector StartingPoint, float LegHeight, float LegThickness, FVector BL, FVector TR);
 	FVector CalculatePointBelow(FVector Point, float Height);
 
 private:

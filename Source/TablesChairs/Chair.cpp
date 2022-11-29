@@ -18,9 +18,9 @@ void AChair::BeginPlay()
 	Super::BeginPlay();
 	
 	//Chair seat vertices
-	FVector ChairSeatBL = { ChairSpawningPoint.X,		 ChairSpawningPoint.Y,		 ChairSpawningPoint.Z + ChairSeatHeight };
-	FVector ChairSeatBR = { ChairSeatBL.X,				 ChairSeatBL.Y + ChairWidth, ChairSeatBL.Z };
-	FVector ChairSeatTR = { ChairSeatBL.X + ChairWidth, ChairSeatBL.Y + ChairWidth, ChairSeatBL.Z };
+	FVector ChairSeatBL = { ChairSpawningPoint.X,		ChairSpawningPoint.Y,		 ChairSpawningPoint.Z + ChairSeatHeight };
+	FVector ChairSeatBR = { ChairSeatBL.X,				ChairSeatBL.Y + ChairWidth,  ChairSeatBL.Z };
+	FVector ChairSeatTR = { ChairSeatBL.X + ChairWidth, ChairSeatBL.Y + ChairWidth,  ChairSeatBL.Z };
 	FVector ChairSeatTL = { ChairSeatBL.X + ChairWidth, ChairSeatBL.Y,				 ChairSeatBL.Z };
 	FVector SeatBottomBL = { CalculatePointBelow(ChairSeatBL, ChairElementsThickness) };
 	FVector SeatBottomBR = { CalculatePointBelow(ChairSeatBR, ChairElementsThickness) };
@@ -70,15 +70,15 @@ void AChair::BeginPlay()
 
 	float HalfLength = ChairWidth / 2;
 
-	DrawLeg(SeatBottomBL, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, HalfLength);
-	DrawLeg(SeatBottomBR, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, HalfLength);
-	DrawLeg(SeatBottomTR, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, HalfLength);
-	DrawLeg(SeatBottomTL, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, HalfLength);
+	DrawLeg(SeatBottomBL, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, ChairSeatBL, ChairSeatTR);
+	DrawLeg(SeatBottomBR, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, ChairSeatBL, ChairSeatTR);
+	DrawLeg(SeatBottomTR, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, ChairSeatBL, ChairSeatTR);
+	DrawLeg(SeatBottomTL, (ChairSeatHeight - ChairElementsThickness), ChairElementsThickness, ChairSeatBL, ChairSeatTR);
 
 	StopDrawing();
 
 
-	this->SetPivotOffset(ChairSpawningPoint);
+	//this->SetPivotOffset(ChairSpawningPoint);
 	//this->SetActorRelativeRotation(FQuat{ 0.f, 0.f, 180.f, 0.f });
 
 	//ThisMesh->AddLocalRotation(this->GetActorRotation();

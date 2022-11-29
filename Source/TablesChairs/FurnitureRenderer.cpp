@@ -112,18 +112,18 @@ void AFurnitureRenderer::StopDrawing()
 	ThisMesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UVs, Colors, Tangents, true);
 }
 
-void AFurnitureRenderer::DrawLeg(FVector CenterPoint, float LegHeight, float LegThickness, float HalfLength)
+void AFurnitureRenderer::DrawLeg(FVector StartingPoint, float LegHeight, float LegThickness, FVector BL, FVector TR)
 {
-	FVector LegCenter = { CenterPoint.X, CenterPoint.Y, LegHeight };
+	FVector LegCenter = { StartingPoint.X, StartingPoint.Y, LegHeight };
 	float HalfLegThickness = LegThickness / 2;
 
-	if (this->GetActorLocation().X - CenterPoint.X < HalfLength)
+	if (StartingPoint.X > ((TR.X + BL.X) / 2))
 		LegCenter.X -= HalfLegThickness;
 	else
 		LegCenter.X += HalfLegThickness;
 
 
-	if (this->GetActorLocation().Y - CenterPoint.Y < HalfLength)
+	if (StartingPoint.Y > ((TR.Y + BL.Y) / 2))
 		LegCenter.Y -= HalfLegThickness;
 	else
 		LegCenter.Y += HalfLegThickness;

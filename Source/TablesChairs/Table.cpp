@@ -44,10 +44,10 @@ void ATable::GenerateTable()
 
 	// Section where I draw each piece of the table
 	DrawCube(TableVertices);
-	DrawLeg(BelowBL, LegHeight, LegThickness);
-	DrawLeg(BelowBR, LegHeight, LegThickness);
-	DrawLeg(BelowTR, LegHeight, LegThickness);
-	DrawLeg(BelowTL, LegHeight, LegThickness);
+	DrawLeg(BelowBL, LegHeight, LegThickness, BottomLeft, BottomRight);
+	DrawLeg(BelowBR, LegHeight, LegThickness, BottomLeft, BottomRight);
+	DrawLeg(BelowTR, LegHeight, LegThickness, BottomLeft, BottomRight);
+	DrawLeg(BelowTL, LegHeight, LegThickness, BottomLeft, BottomRight);
 
 	StopDrawing();
 
