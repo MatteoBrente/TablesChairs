@@ -93,9 +93,9 @@ void ATable::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATable::StartMoving()
 {
-	MovingPoint = &TopRight;
-	PointWithSameX = &TopLeft;
-	PointWithSameY = &BottomRight;
+	MovingPoint = &BottomLeft;
+	PointWithSameX = &BottomRight;
+	PointWithSameY = &TopLeft;
 	MouseIsPressed = true;
 	
 	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseY, StartingMouseX))
@@ -107,25 +107,10 @@ void ATable::MoveTablePoints()
 	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(NewMouseY, NewMouseX))
 		return;
 
-	if (PointWithSameX && PointWithSameY)
+	if (MovingPoint && PointWithSameX && PointWithSameY)
 	{
-		// Calculate new positions
-		float NewXPosition = (NewMouseX - StartingMouseX);
-		float NewYPosition = (NewMouseY - StartingMouseY);
-
-		if ((TableX - NewXPosition) >= TableMin && (TableX - NewXPosition) <= TableMax)
-		{
-			// Remove the X difference (the mouse moves in the opposite direction of the world coordinates)
-			MovingPoint->X -= NewXPosition;
-			PointWithSameX->X -= NewXPosition;
-		}
-
-		if ((TableY + NewYPosition) >= TableMin && (TableY + NewYPosition) <= TableMax)
-		{
-			// Add the Y difference
-			MovingPoint->Y += NewYPosition;
-			PointWithSameY->Y += NewYPosition;
-		}
+		MoveOnX();
+		MoveOnY();
 
 		// Set the starting points to the new position
 		StartingMouseX = NewMouseX;
@@ -135,6 +120,56 @@ void ATable::MoveTablePoints()
 	// Calculate new distances
 	TableX = FVector::Dist(BottomLeft, TopLeft);
 	TableY = FVector::Dist(BottomLeft, BottomRight);
+}
+
+void ATable::MoveOnX()
+{
+	// Calculate new position
+	float NewXPosition = (NewMouseX - StartingMouseX);
+
+	if ((MovingPoint->X - PointWithSameY->X) > 0)
+	{
+		if ((TableX - NewXPosition) >= TableMin && (TableX - NewXPosition) <= TableMax)
+		{
+			// Remove the X difference (the mouse moves in the opposite direction of the world coordinates)
+			MovingPoint->X -= NewXPosition;
+			PointWithSameX->X -= NewXPosition;
+		}
+	}
+	else
+	{
+		if ((TableX + NewXPosition) >= TableMin && (TableX + NewXPosition) <= TableMax)
+		{
+			// Remove the X difference (the mouse moves in the opposite direction of the world coordinates)
+			MovingPoint->X -= NewXPosition;
+			PointWithSameX->X -= NewXPosition;
+		}
+	}
+}
+
+void ATable::MoveOnY()
+{
+	// Calculate new position
+	float NewYPosition = (NewMouseY - StartingMouseY);
+
+	if ((MovingPoint->Y - PointWithSameX->Y) > 0)
+	{
+		if ((TableY + NewYPosition) >= TableMin && (TableY + NewYPosition) <= TableMax)
+		{
+			// Add the Y difference
+			MovingPoint->Y += NewYPosition;
+			PointWithSameY->Y += NewYPosition;
+		}
+	}
+	else
+	{
+		if ((TableY - NewYPosition) >= TableMin && (TableY - NewYPosition) <= TableMax)
+		{
+			// Add the Y difference
+			MovingPoint->Y += NewYPosition;
+			PointWithSameY->Y += NewYPosition;
+		}
+	}
 }
 
 void ATable::StopMoving()

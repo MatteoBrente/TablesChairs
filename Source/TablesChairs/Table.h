@@ -96,7 +96,11 @@ private:
 
 	// Movement functions
 	void StartMoving();
+
 	void MoveTablePoints();
+	void MoveOnX();
+	void MoveOnY();
+
 	void StopMoving();
 
 	// Chair variables
