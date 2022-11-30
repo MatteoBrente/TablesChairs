@@ -89,8 +89,10 @@ private:
 	float NewMouseX = 0;
 	float NewMouseY = 0;
 
-	FVector* MovingPoint = nullptr;
 	bool MouseIsPressed = false;
+	FVector* MovingPoint = nullptr;
+	FVector* PointWithSameX = nullptr;
+	FVector* PointWithSameY = nullptr;
 
 	// Movement functions
 	void StartMoving();

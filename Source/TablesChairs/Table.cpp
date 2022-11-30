@@ -94,43 +94,36 @@ void ATable::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ATable::StartMoving()
 {
 	MovingPoint = &TopRight;
+	PointWithSameX = &TopLeft;
+	PointWithSameY = &BottomRight;
 	MouseIsPressed = true;
 	
-	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseX, StartingMouseY))
+	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseY, StartingMouseX))
 		return;
 }
 
 void ATable::MoveTablePoints()
 {
-	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(NewMouseX, NewMouseY))
+	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(NewMouseY, NewMouseX))
 		return;
 
-	FVector* PointWithSameY = nullptr;
-	FVector* PointWithSameX = nullptr;
-	const FVector Points[4] = { BottomLeft, BottomRight, TopRight, TopLeft };
-
-	for (FVector Point : Points)
+	if (PointWithSameX && PointWithSameY)
 	{
-		if ((Point.X == MovingPoint->X) && (Point.Y != MovingPoint->Y))
-			PointWithSameX = &Point;
-
-		if ((Point.Y == MovingPoint->Y) && (Point.X != MovingPoint->X))
-			PointWithSameY = &Point;
-	}
-
-	if (PointWithSameX != nullptr && PointWithSameY != nullptr)
-	{
-		float NewXPosition = NewMouseX - StartingMouseX;
-		float NewYPosition = NewMouseY - StartingMouseY;
+		// Calculate new positions, dividing them because otherwise the mouse moves too fast
+		float NewXPosition = (NewMouseX - StartingMouseX);
+		float NewYPosition = (NewMouseY - StartingMouseY);
 		
-		MovingPoint->X += NewXPosition;
-		PointWithSameX->X += NewXPosition;
+		// Remove the X difference because the mouse moves in the opposite direction of the world coordinates
+		MovingPoint->X -= NewXPosition;
+		PointWithSameX->X -= NewXPosition;
 
+		// Add the Y difference
 		MovingPoint->Y += NewYPosition;
 		PointWithSameY->Y += NewYPosition;
 
-		UE_LOG(LogTemp, Warning, TEXT("NewX = %f"), NewXPosition);
-		UE_LOG(LogTemp, Warning, TEXT("NewY = %f"), NewYPosition);
+		// Set the starting points to the new position
+		StartingMouseX = NewMouseX;
+		StartingMouseY = NewMouseY;
 	}
 	
 	TableX = FVector::Dist(BottomLeft, TopLeft);
