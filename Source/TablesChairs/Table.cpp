@@ -9,7 +9,12 @@ ATable::ATable()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	APawn::PrimaryActorTick.bCanEverTick = true;
 
+	// Set this pawn to be controlled by the lowest-numbered player
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
 	World = GetWorld();
+
+	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("OurCamera")); 
 }
 
 // Called when the game starts or when spawned
@@ -17,20 +22,27 @@ void ATable::BeginPlay()
 {
 	APawn::BeginPlay();
 
-	GenerateTable();
+	// Calculate initial distance to correctly spawn chairs
+	TableX = FVector::Dist(BottomLeft, TopLeft);
+	TableY = FVector::Dist(BottomLeft, BottomRight);
+
+	// Set Camera Position and Rotation
+	OurCamera->SetupAttachment(RootComponent);
+	OurCamera->SetRelativeLocation(FVector(-400.0f, 0.0f, 400.0f));
+	OurCamera->SetRelativeRotation(FRotator(-45.0f, 0.0f, 0.0f));
 }
 
-void ATable::GenerateTable()
+void ATable::DrawTable()
 {
 	StartDrawing();
 
-	// Vectors under the main ones (bottom of the tabletop)
+	// Vectors of the bottom of the tabletop
 	FVector BelowBL = CalculatePointBelow(BottomLeft, TableTopHeight);
 	FVector BelowBR = CalculatePointBelow(BottomRight, TableTopHeight);
 	FVector BelowTR = CalculatePointBelow(TopRight, TableTopHeight);
 	FVector BelowTL = CalculatePointBelow(TopLeft, TableTopHeight);
 
-	FVector TableVertices[8] =
+	FVector TableTopVertices[8] =
 	{
 		BottomLeft,	  // Top Back  Right
 		BottomRight,  // Top Front Right
@@ -42,25 +54,14 @@ void ATable::GenerateTable()
 		BelowTL		  // Bottom Back  Left
 	};
 
-	// Section where I draw each piece of the table
-	DrawCube(TableVertices);
+	// Draw the tabletop and then the legs
+	DrawCube(TableTopVertices);
 	DrawLeg(BelowBL, LegHeight, LegThickness, BottomLeft, BottomRight);
 	DrawLeg(BelowBR, LegHeight, LegThickness, BottomLeft, BottomRight);
 	DrawLeg(BelowTR, LegHeight, LegThickness, BottomLeft, BottomRight);
 	DrawLeg(BelowTL, LegHeight, LegThickness, BottomLeft, BottomRight);
 
 	StopDrawing();
-
-	UpdateTableSize();
-
-	// Drawing chairs begins here
-	DeleteAllChairs();
-	SpawnChairs();
-
-	GEngine->ForceGarbageCollection();
-
-	TopRight.Y++;
-	BottomRight.Y++;
 }
 
 // Called every frame
@@ -68,7 +69,20 @@ void ATable::Tick(float DeltaTime)
 {
 	APawn::Tick(DeltaTime);
 
-	GenerateTable();
+	// Draw table and chairs
+	DrawTable();
+	DeleteMyChairs();
+	DrawChairs();
+
+	// Mouse input and table size change
+	InputComponent->BindAction("LeftClick", IE_Pressed, this, &ATable::StartMoving);
+	InputComponent->BindAction("LeftClick", IE_Released, this, &ATable::StopMoving);
+	
+	if (MouseIsPressed && MovingPoint != nullptr)
+		MoveTablePoints();
+
+	// Leaves no weird stuff after all the chair deletions
+	GEngine->ForceGarbageCollection();
 }
 
 // Called to bind functionality to input
@@ -77,17 +91,63 @@ void ATable::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	APawn::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ATable::UpdateTableSize()
+void ATable::StartMoving()
 {
-	TableX = FVector::Dist(BottomLeft, TopLeft);
-	TableY = FVector::Dist(BottomLeft, BottomRight);
-
-	UsableTableX = TableX - LegThickness * 2;
-	UsableTableY = TableY - LegThickness * 2;
+	MovingPoint = &TopRight;
+	MouseIsPressed = true;
+	
+	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseX, StartingMouseY))
+		return;
 }
 
-void ATable::SpawnChairs()
+void ATable::MoveTablePoints()
 {
+	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(NewMouseX, NewMouseY))
+		return;
+
+	FVector* PointWithSameY = nullptr;
+	FVector* PointWithSameX = nullptr;
+	const FVector Points[4] = { BottomLeft, BottomRight, TopRight, TopLeft };
+
+	for (FVector Point : Points)
+	{
+		if ((Point.X == MovingPoint->X) && (Point.Y != MovingPoint->Y))
+			PointWithSameX = &Point;
+
+		if ((Point.Y == MovingPoint->Y) && (Point.X != MovingPoint->X))
+			PointWithSameY = &Point;
+	}
+
+	if (PointWithSameX != nullptr && PointWithSameY != nullptr)
+	{
+		float NewXPosition = NewMouseX - StartingMouseX;
+		float NewYPosition = NewMouseY - StartingMouseY;
+		
+		MovingPoint->X += NewXPosition;
+		PointWithSameX->X += NewXPosition;
+
+		MovingPoint->Y += NewYPosition;
+		PointWithSameY->Y += NewYPosition;
+
+		UE_LOG(LogTemp, Warning, TEXT("NewX = %f"), NewXPosition);
+		UE_LOG(LogTemp, Warning, TEXT("NewY = %f"), NewYPosition);
+	}
+	
+	TableX = FVector::Dist(BottomLeft, TopLeft);
+	TableY = FVector::Dist(BottomLeft, BottomRight);
+}
+
+void ATable::StopMoving()
+{
+	MouseIsPressed = false;
+	MovingPoint = nullptr;
+}
+
+void ATable::DrawChairs()
+{
+	UsableTableX = TableX - LegThickness * 2;
+	UsableTableY = TableY - LegThickness * 2;
+
 	// Update chair numbers on all axis
 	UpdateNumberOfChairsOnY();
 	UpdateNumberOfChairsOnX();
@@ -129,7 +189,7 @@ void ATable::SpawnChairs()
 	}
 }
 
-void ATable::DeleteAllChairs()
+void ATable::DeleteMyChairs()
 {
 	for (AChair* Chair : MyChairs)
 	{

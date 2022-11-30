@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FurnitureRenderer.h"
 #include "Components/SceneComponent.h"
 #include "FurnitureRenderer.h"
 #include "Chair.h"
+
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
 #include <vector>
 
 #include "Table.generated.h"
@@ -55,7 +57,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void GenerateTable();
+	void DrawTable();
 
 public:
 	// Called every frame
@@ -65,6 +67,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	// Camera
+	UCameraComponent* OurCamera;
+	
 	// Main tabletop vertices
 	FVector BottomLeft = FVector(-TableX, -TableY, TableZ);
 	FVector BottomRight = FVector(-TableX, TableY, TableZ);
@@ -77,8 +82,20 @@ private:
 
 	float LegHeight = TableZ - TableTopHeight;
 
-	// Table functions
-	void UpdateTableSize();
+	// Movement variables
+	float StartingMouseX = 0;
+	float StartingMouseY = 0;
+
+	float NewMouseX = 0;
+	float NewMouseY = 0;
+
+	FVector* MovingPoint = nullptr;
+	bool MouseIsPressed = false;
+
+	// Movement functions
+	void StartMoving();
+	void MoveTablePoints();
+	void StopMoving();
 
 	// Chair variables
 	std::vector<AChair*> MyChairs = {};
@@ -94,8 +111,8 @@ private:
 	FVector SetChairPositionOnX(int CurrentChairNumber, bool IsOpposite = false);
 
 	// Chair functions
-	void SpawnChairs();
-	void DeleteAllChairs();
+	void DrawChairs();
+	void DeleteMyChairs();
 	void UpdateNumberOfChairsOnY();
 	void UpdateNumberOfChairsOnX();
 };
