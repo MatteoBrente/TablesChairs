@@ -45,7 +45,7 @@ public:
 		float TableMin = 80.f;
 
 	UPROPERTY(EditAnywhere)
-		float TableMax = 300.f;
+		float TableMax = 400.f;
 
 	UPROPERTY(EditAnywhere)
 		float ChairSize = 40.f;

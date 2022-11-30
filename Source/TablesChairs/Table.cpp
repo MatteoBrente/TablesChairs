@@ -109,23 +109,30 @@ void ATable::MoveTablePoints()
 
 	if (PointWithSameX && PointWithSameY)
 	{
-		// Calculate new positions, dividing them because otherwise the mouse moves too fast
+		// Calculate new positions
 		float NewXPosition = (NewMouseX - StartingMouseX);
 		float NewYPosition = (NewMouseY - StartingMouseY);
-		
-		// Remove the X difference because the mouse moves in the opposite direction of the world coordinates
-		MovingPoint->X -= NewXPosition;
-		PointWithSameX->X -= NewXPosition;
 
-		// Add the Y difference
-		MovingPoint->Y += NewYPosition;
-		PointWithSameY->Y += NewYPosition;
+		if ((TableX - NewXPosition) >= TableMin && (TableX - NewXPosition) <= TableMax)
+		{
+			// Remove the X difference (the mouse moves in the opposite direction of the world coordinates)
+			MovingPoint->X -= NewXPosition;
+			PointWithSameX->X -= NewXPosition;
+		}
+
+		if ((TableY + NewYPosition) >= TableMin && (TableY + NewYPosition) <= TableMax)
+		{
+			// Add the Y difference
+			MovingPoint->Y += NewYPosition;
+			PointWithSameY->Y += NewYPosition;
+		}
 
 		// Set the starting points to the new position
 		StartingMouseX = NewMouseX;
 		StartingMouseY = NewMouseY;
 	}
 	
+	// Calculate new distances
 	TableX = FVector::Dist(BottomLeft, TopLeft);
 	TableY = FVector::Dist(BottomLeft, BottomRight);
 }
@@ -145,7 +152,7 @@ void ATable::DrawChairs()
 	UpdateNumberOfChairsOnY();
 	UpdateNumberOfChairsOnX();
 
-	// Set quaternions for later chair creation calls
+	// Quaternions used for the chair creation calls
 	FQuat Forward  = FQuat{ 0.f, 0.f, 0.f, 0.f };
 	FQuat Backward = FQuat{ 0.f, 0.f, 180.f, 0.f };
 	FQuat Right = FQuat{ FRotator{0.f, 90.f, 0.f} };
@@ -186,7 +193,6 @@ void ATable::DeleteMyChairs()
 {
 	for (AChair* Chair : MyChairs)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("%i"), MyChairs.size());
 		Chair->Destroy();
 	}
 	MyChairs.clear();
