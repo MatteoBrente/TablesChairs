@@ -4,7 +4,7 @@
 #include "Table.h"
 
 // Sets default values
-ATable::ATable()
+ATable::ATable() : Super()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	APawn::PrimaryActorTick.bCanEverTick = true;
@@ -14,7 +14,21 @@ ATable::ATable()
 
 	World = GetWorld();
 
-	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("OurCamera")); 
+	// Create Camera and Widget Objects
+	TableCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	TableCamera->SetupAttachment(RootComponent);
+
+	WidgetBL = CreateDefaultSubobject<UWidgetComponent>(TEXT("Bottom Left Widget"));
+	WidgetBL->SetupAttachment(RootComponent);
+
+	WidgetBR = CreateDefaultSubobject<UWidgetComponent>(TEXT("Bottom Right Widget"));
+	WidgetBR->SetupAttachment(RootComponent);
+
+	WidgetTR = CreateDefaultSubobject<UWidgetComponent>(TEXT("Top Right Widget"));
+	WidgetTR->SetupAttachment(RootComponent);
+
+	WidgetTL = CreateDefaultSubobject<UWidgetComponent>(TEXT("Top Left Widget"));
+	WidgetTL->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -27,9 +41,8 @@ void ATable::BeginPlay()
 	TableY = FVector::Dist(BottomLeft, BottomRight);
 
 	// Set Camera Position and Rotation
-	OurCamera->SetupAttachment(RootComponent);
-	OurCamera->SetRelativeLocation(FVector(-300.0f, 0.0f, 500.0f));
-	OurCamera->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
+	TableCamera->SetRelativeLocation(FVector(-300.0f, 0.0f, 500.0f));
+	TableCamera->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (PC)
@@ -82,8 +95,13 @@ void ATable::Tick(float DeltaTime)
 	InputComponent->BindAction("LeftClick", IE_Pressed, this, &ATable::StartMoving);
 	InputComponent->BindAction("LeftClick", IE_Released, this, &ATable::StopMoving);
 	
-	if (MouseIsPressed && MovingPoint != nullptr)
+	if (IsMoving && MovingPoint != nullptr)
 		MoveTablePoints();
+
+	WidgetBL->SetRelativeLocation(BottomLeft);
+	WidgetBR->SetRelativeLocation(BottomRight);
+	WidgetTR->SetRelativeLocation(TopRight);
+	WidgetTL->SetRelativeLocation(TopLeft);
 
 	// Leaves no weird stuff after all the chair deletions
 	GEngine->ForceGarbageCollection();
@@ -100,7 +118,7 @@ void ATable::StartMoving()
 	MovingPoint = &BottomLeft;
 	PointWithSameX = &BottomRight;
 	PointWithSameY = &TopLeft;
-	MouseIsPressed = true;
+	IsMoving = true;
 	
 	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseY, StartingMouseX))
 		return;
@@ -178,8 +196,11 @@ void ATable::MoveOnY()
 
 void ATable::StopMoving()
 {
-	MouseIsPressed = false;
+	IsMoving = false;
+
 	MovingPoint = nullptr;
+	PointWithSameX = nullptr;
+	PointWithSameY = nullptr;
 }
 
 void ATable::DrawChairs()

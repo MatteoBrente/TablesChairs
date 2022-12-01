@@ -9,6 +9,8 @@
 
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Engine/StaticMeshSocket.h"
 #include <vector>
 
 #include "Table.generated.h"
@@ -68,33 +70,38 @@ public:
 
 private:
 	// Camera
-	UCameraComponent* OurCamera;
+	UPROPERTY (VisibleAnywhere)
+		UCameraComponent* TableCamera;
 	
 	// Main tabletop vertices
+
 	FVector BottomLeft = FVector(-TableX, -TableY, TableZ);
 	FVector BottomRight = FVector(-TableX, TableY, TableZ);
 	FVector TopRight = FVector(TableX, TableY, TableZ);
 	FVector TopLeft = FVector(TableX, -TableY, TableZ);
 
 	// Table variables
+
 	float UsableTableX = TableX - LegThickness * 2;
 	float UsableTableY = TableY - LegThickness * 2;
 
 	float LegHeight = TableZ - TableTopHeight;
 
 	// Movement variables
+
 	float StartingMouseX = 0;
 	float StartingMouseY = 0;
 
 	float NewMouseX = 0;
 	float NewMouseY = 0;
 
-	bool MouseIsPressed = false;
+	bool IsMoving = false;
 	FVector* MovingPoint = nullptr;
 	FVector* PointWithSameX = nullptr;
 	FVector* PointWithSameY = nullptr;
 
 	// Movement functions
+
 	void StartMoving();
 
 	void MoveTablePoints();
@@ -104,6 +111,7 @@ private:
 	void StopMoving();
 
 	// Chair variables
+
 	std::vector<AChair*> MyChairs = {};
 
 	int NumberOfChairsOnX = 0;
@@ -113,12 +121,28 @@ private:
 	float CurrentChairDistanceOnX = 0;
 
 	// Chair position vectors
+
 	FVector SetChairPositionOnY(int CurrentChairNumber, bool IsOpposite = false);
 	FVector SetChairPositionOnX(int CurrentChairNumber, bool IsOpposite = false);
 
 	// Chair functions
+
 	void DrawChairs();
 	void DeleteMyChairs();
 	void UpdateNumberOfChairsOnY();
 	void UpdateNumberOfChairsOnX();
+
+	// UI variables
+
+	UPROPERTY(VisibleAnywhere)
+		UWidgetComponent* WidgetBL;
+
+	UPROPERTY(VisibleAnywhere)
+		UWidgetComponent* WidgetBR;
+
+	UPROPERTY(VisibleAnywhere)
+		UWidgetComponent* WidgetTR;
+
+	UPROPERTY(VisibleAnywhere)
+		UWidgetComponent* WidgetTL;
 };
