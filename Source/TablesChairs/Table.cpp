@@ -28,8 +28,12 @@ void ATable::BeginPlay()
 
 	// Set Camera Position and Rotation
 	OurCamera->SetupAttachment(RootComponent);
-	OurCamera->SetRelativeLocation(FVector(-400.0f, 0.0f, 400.0f));
-	OurCamera->SetRelativeRotation(FRotator(-45.0f, 0.0f, 0.0f));
+	OurCamera->SetRelativeLocation(FVector(-300.0f, 0.0f, 500.0f));
+	OurCamera->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+		PC->bShowMouseCursor = true;
 }
 
 void ATable::DrawTable()
