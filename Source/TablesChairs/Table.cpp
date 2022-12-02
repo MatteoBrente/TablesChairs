@@ -17,18 +17,6 @@ ATable::ATable() : Super()
 	// Create Camera and Widget Objects
 	TableCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	TableCamera->SetupAttachment(RootComponent);
-
-	WidgetBL = CreateDefaultSubobject<UWidgetComponent>(TEXT("Bottom Left Widget"));
-	WidgetBL->SetupAttachment(RootComponent);
-
-	WidgetBR = CreateDefaultSubobject<UWidgetComponent>(TEXT("Bottom Right Widget"));
-	WidgetBR->SetupAttachment(RootComponent);
-
-	WidgetTR = CreateDefaultSubobject<UWidgetComponent>(TEXT("Top Right Widget"));
-	WidgetTR->SetupAttachment(RootComponent);
-
-	WidgetTL = CreateDefaultSubobject<UWidgetComponent>(TEXT("Top Left Widget"));
-	WidgetTL->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -92,16 +80,15 @@ void ATable::Tick(float DeltaTime)
 	DrawChairs();
 
 	// Mouse input and table size change
-	InputComponent->BindAction("LeftClick", IE_Pressed, this, &ATable::StartMoving);
+	InputComponent->BindAction("SelectBL", IE_Pressed, this, &ATable::StartMovingBL);
+	InputComponent->BindAction("SelectBR", IE_Pressed, this, &ATable::StartMovingBR);
+	InputComponent->BindAction("SelectTR", IE_Pressed, this, &ATable::StartMovingTR);
+	InputComponent->BindAction("SelectTL", IE_Pressed, this, &ATable::StartMovingTL);
+
 	InputComponent->BindAction("LeftClick", IE_Released, this, &ATable::StopMoving);
 	
-	if (IsMoving && MovingPoint != nullptr)
+	if (ShouldMove && MovingPoint != nullptr)
 		MoveTablePoints();
-
-	WidgetBL->SetRelativeLocation(BottomLeft);
-	WidgetBR->SetRelativeLocation(BottomRight);
-	WidgetTR->SetRelativeLocation(TopRight);
-	WidgetTL->SetRelativeLocation(TopLeft);
 
 	// Leaves no weird stuff after all the chair deletions
 	GEngine->ForceGarbageCollection();
@@ -113,13 +100,46 @@ void ATable::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	APawn::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ATable::StartMoving()
+void ATable::StartMovingBL()
 {
 	MovingPoint = &BottomLeft;
 	PointWithSameX = &BottomRight;
 	PointWithSameY = &TopLeft;
-	IsMoving = true;
+	ShouldMove = true;
 	
+	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseY, StartingMouseX))
+		return;
+}
+
+void ATable::StartMovingBR()
+{
+	MovingPoint = &BottomRight;
+	PointWithSameX = &BottomLeft;
+	PointWithSameY = &TopRight;
+	ShouldMove = true;
+
+	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseY, StartingMouseX))
+		return;
+}
+
+void ATable::StartMovingTR()
+{
+	MovingPoint = &TopRight;
+	PointWithSameX = &TopLeft;
+	PointWithSameY = &BottomRight;
+	ShouldMove = true;
+
+	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseY, StartingMouseX))
+		return;
+}
+
+void ATable::StartMovingTL()
+{
+	MovingPoint = &TopLeft;
+	PointWithSameX = &TopRight;
+	PointWithSameY = &BottomLeft;
+	ShouldMove = true;
+
 	if (!UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(StartingMouseY, StartingMouseX))
 		return;
 }
@@ -196,7 +216,7 @@ void ATable::MoveOnY()
 
 void ATable::StopMoving()
 {
-	IsMoving = false;
+	ShouldMove = false;
 
 	MovingPoint = nullptr;
 	PointWithSameX = nullptr;

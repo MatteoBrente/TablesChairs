@@ -9,8 +9,6 @@
 
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
-#include "Components/WidgetComponent.h"
-#include "Engine/StaticMeshSocket.h"
 #include <vector>
 
 #include "Table.generated.h"
@@ -95,14 +93,17 @@ private:
 	float NewMouseX = 0;
 	float NewMouseY = 0;
 
-	bool IsMoving = false;
+	bool ShouldMove = false;
 	FVector* MovingPoint = nullptr;
 	FVector* PointWithSameX = nullptr;
 	FVector* PointWithSameY = nullptr;
 
 	// Movement functions
 
-	void StartMoving();
+	void StartMovingBL();
+	void StartMovingBR();
+	void StartMovingTR();
+	void StartMovingTL();
 
 	void MoveTablePoints();
 	void MoveOnX();
@@ -131,18 +132,4 @@ private:
 	void DeleteMyChairs();
 	void UpdateNumberOfChairsOnY();
 	void UpdateNumberOfChairsOnX();
-
-	// UI variables
-
-	UPROPERTY(VisibleAnywhere)
-		UWidgetComponent* WidgetBL;
-
-	UPROPERTY(VisibleAnywhere)
-		UWidgetComponent* WidgetBR;
-
-	UPROPERTY(VisibleAnywhere)
-		UWidgetComponent* WidgetTR;
-
-	UPROPERTY(VisibleAnywhere)
-		UWidgetComponent* WidgetTL;
 };
